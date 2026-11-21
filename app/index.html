@@ -3,102 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vice Cover Studio - Pembuat Cover GTA 6</title>
+    <title>Leonida Cover Studio — Pembuat Cover Art ala GTA 6</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app" class="editor-mode">
-        <!-- Editor UI -->
-        <header id="editor-header">
-            <h1>VICE COVER STUDIO</h1>
-            <p>Ubah fotomu menjadi cover gaya GTA 6</p>
-        </header>
+    <div id="app">
+        <!-- Sidebar Kontrol -->
+        <aside class="sidebar">
+            <header>
+                <h1>Leonida</h1>
+                <p>Cover Studio</p>
+            </header>
 
-        <main id="main-container">
-            <div id="preview-area">
-                <div id="canvas-container">
-                    <canvas id="cover-canvas"></canvas>
+            <section class="control-group">
+                <h3>Layout</h3>
+                <div class="button-grid">
+                    <button data-layout="trio" class="active">Trio</button>
+                    <button data-layout="duo">Duo</button>
+                    <button data-layout="solo">Solo</button>
                 </div>
-                <div id="drag-hint">Geser foto untuk memposisikan</div>
+            </section>
+
+            <section class="control-group">
+                <h3>Foto</h3>
+                <div class="photo-controls">
+                    <button id="upload-btn">Unggah Foto</button>
+                    <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+                    <div class="sample-photos">
+                        <button data-sample="pier">Foto Pier</button>
+                        <button data-sample="boulevard">Foto Boulevard</button>
+                    </div>
+                </div>
+                <p class="hint">Klik panel di pratinjau untuk mengganti fotonya.</p>
+            </section>
+
+            <section class="control-group" id="transform-controls">
+                <h3>Transformasi Panel</h3>
+                <div class="slider-group">
+                    <label>Zoom</label>
+                    <input type="range" id="zoom-slider" min="0.1" max="3" step="0.01" value="1">
+                </div>
+                <div class="slider-group">
+                    <label>Posisi X</label>
+                    <input type="range" id="pos-x-slider" min="-1" max="1" step="0.01" value="0">
+                </div>
+                <div class="slider-group">
+                    <label>Posisi Y</label>
+                    <input type="range" id="pos-y-slider" min="-1" max="1" step="0.01" value="0">
+                </div>
+            </section>
+
+            <section class="control-group">
+                <h3>Caption</h3>
+                <input type="text" id="caption-main" placeholder="Judul Utama" value="SUNSET HEIST">
+                <input type="text" id="caption-sub" placeholder="Subjudul" value="VICE CITY • LEONIDA">
+                <div class="caption-options">
+                    <label>Warna Teks</label>
+                    <div class="color-grid">
+                        <button data-color="#FFFFFF" style="background: #FFFFFF;" class="active"></button>
+                        <button data-color="#FFD700" style="background: #FFD700;"></button>
+                        <button data-color="#00FFFF" style="background: #00FFFF;"></button>
+                        <button data-color="#FF00FF" style="background: #FF00FF;"></button>
+                    </div>
+                </div>
+                <div class="slider-group">
+                    <label>Ukuran Judul</label>
+                    <input type="range" id="caption-size" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                <div class="button-grid">
+                    <button data-pos="top">Atas</button>
+                    <button data-pos="bottom" class="active">Bawah</button>
+                </div>
+            </section>
+
+            <section class="control-group">
+                <h3>Grade Warna</h3>
+                <div class="button-grid">
+                    <button data-grade="sunset" class="active">Sunset</button>
+                    <button data-grade="neon">Neon</button>
+                    <button data-grade="malam">Malam</button>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="grade-toggle" checked> Terapkan Grade
+                </label>
+            </section>
+
+            <section class="control-group">
+                <h3>Export</h3>
+                <select id="export-size">
+                    <option value="1080x1080">Kotak (1080x1080)</option>
+                    <option value="1080x1350">Portrait (1080x1350)</option>
+                    <option value="1920x1080" selected>Landscape (1920x1080)</option>
+                </select>
+                <button id="download-btn" class="primary">Unduh PNG</button>
+            </section>
+        </aside>
+
+        <!-- Preview Area -->
+        <main class="preview-area">
+            <div id="canvas-container">
+                <canvas id="main-canvas"></canvas>
             </div>
-
-            <aside id="controls">
-                <section class="control-group">
-                    <h3>Layout</h3>
-                    <div class="button-row">
-                        <button class="btn active" data-layout="trio">Trio</button>
-                        <button class="btn" data-layout="duo">Duo</button>
-                        <button class="btn" data-layout="solo">Solo</button>
-                    </div>
-                </section>
-
-                <section class="control-group">
-                    <h3>Ukuran</h3>
-                    <div class="button-row">
-                        <button class="btn" data-size="1080x1080">Kotak</button>
-                        <button class="btn active" data-size="1920x1080">Landscape</button>
-                        <button class="btn" data-size="1080x1350">Portrait</button>
-                    </div>
-                </section>
-
-                <section class="control-group">
-                    <h3>Foto</h3>
-                    <div class="input-row">
-                        <label for="photo-input" class="btn btn-primary">Pilih Foto</label>
-                        <input type="file" id="photo-input" accept="image/*" multiple hidden>
-                        <button class="btn" id="sample-pier">Contoh 1</button>
-                        <button class="btn" id="sample-boulevard">Contoh 2</button>
-                    </div>
-                    <div id="panel-controls" class="hidden">
-                        <p>Mengatur Panel <span id="active-panel-num">1</span></p>
-                        <div class="slider-row">
-                            <label>Zoom</label>
-                            <input type="range" id="zoom-slider" min="0.1" max="3" step="0.01" value="1">
-                        </div>
-                    </div>
-                </section>
-
-                <section class="control-group">
-                    <h3>Caption</h3>
-                    <input type="text" id="title-input" placeholder="Judul Besar" value="SUNSET HEIST">
-                    <input type="text" id="subtitle-input" placeholder="Subjudul" value="VICE CITY • LEONIDA">
-                    <div class="button-row">
-                        <button class="btn" data-pos="top">Atas</button>
-                        <button class="btn active" data-pos="bottom">Bawah</button>
-                    </div>
-                    <div class="color-row">
-                        <button class="color-btn white active" data-color="white"></button>
-                        <button class="color-btn sunset" data-color="#ff9a00"></button>
-                        <button class="color-btn neon" data-color="#00f2ff"></button>
-                        <button class="color-btn pink" data-color="#ff00ea"></button>
-                    </div>
-                </section>
-
-                <section class="control-group">
-                    <h3>Warna & Grade</h3>
-                    <div class="button-row">
-                        <button class="btn active" data-grade="sunset">Sunset</button>
-                        <button class="btn" data-grade="neon">Neon</button>
-                        <button class="btn" data-grade="malam">Malam</button>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" id="grade-toggle" checked>
-                        <span>Aktifkan Filter</span>
-                    </label>
-                </section>
-
-                <section class="export-group">
-                    <button id="download-btn" class="btn btn-large btn-success">Unduh PNG</button>
-                </section>
-            </aside>
         </main>
-
-        <div id="screenshot-view" class="hidden">
-            <canvas id="screenshot-canvas"></canvas>
-        </div>
     </div>
 
-    <script type="module" src="src/render.js"></script>
-    <script type="module" src="src/studio.js"></script>
+    <script type="module" src="src/editor.js"></script>
 </body>
 </html>

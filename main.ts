@@ -1,51 +1,44 @@
-import { writeFileSync, mkdirSync, cpSync, readdirSync, lstatSync } from 'node:fs';
-import { join } from 'node:path';
+import { cpSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-/**
- * Vice Cover Studio entry plumbing.
- * Copies app/ and screenshots/ to the output directory and writes dossier.json.
- */
-
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const outputDir = process.env.MAKEFUN_OUTPUT_DIR || '/output';
-const repoDir = process.cwd();
 
-// Ensure output directory exists
-try {
+function main() {
+    console.log(`Packaging Leonida Cover Studio to ${outputDir}...`);
+
+    // Ensure output directory exists
     mkdirSync(outputDir, { recursive: true });
-} catch (err) {
-    // Ignore if exists
-}
 
-// Copy app/ and screenshots/
-const dirsToCopy = ['app', 'screenshots'];
-for (const dir of dirsToCopy) {
-    const src = join(repoDir, dir);
-    const dest = join(outputDir, dir);
-    try {
-        if (lstatSync(src).isDirectory()) {
-            cpSync(src, dest, { recursive: true });
-        }
-    } catch (err) {
-        console.error(`Gagal menyalin ${dir}: ${(err as Error).message}`);
+    // Copy app directory
+    const appSrc = join(__dirname, 'app');
+    const appDest = join(outputDir, 'app');
+    cpSync(appSrc, appDest, { recursive: true });
+
+    // Copy screenshots directory
+    const shotsSrc = join(__dirname, 'screenshots');
+    const shotsDest = join(outputDir, 'screenshots');
+    if (existsSync(shotsSrc)) {
+        mkdirSync(shotsDest, { recursive: true });
+        cpSync(shotsSrc, shotsDest, { recursive: true });
+    } else {
+        console.warn('Warning: screenshots/ directory not found.');
     }
+
+    // Write dossier.json
+    const dossierPath = join(outputDir, 'dossier.json');
+    const dossier = buildDossier(outputDir, {
+        text_max_bytes: 163840,
+        screenshots: { max: 4, max_bytes: 262144 },
+        app_max_files: 993,
+        app_max_bytes: 50331648,
+        app_path_max_bytes: 1000,
+    });
+    writeFileSync(dossierPath, dossier);
+
+    console.log('Packaging complete.');
 }
 
-// Build and write dossier.json
-// Caps from starter/main.ts and RULES.txt
-const caps = {
-    text_max_bytes: 163840,
-    screenshots: { max: 4, max_bytes: 262144 },
-    app_max_files: 993,
-    app_max_bytes: 50331648,
-    app_path_max_bytes: 1000,
-};
-
-try {
-    const dossierBytes = buildDossier(outputDir, caps);
-    writeFileSync(join(outputDir, 'dossier.json'), dossierBytes);
-    console.log(`Dossier berhasil ditulis ke ${join(outputDir, 'dossier.json')}`);
-} catch (err) {
-    console.error(`Gagal membangun dossier: ${(err as Error).message}`);
-    process.exit(1);
-}
+main();
